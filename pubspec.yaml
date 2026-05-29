@@ -43,6 +43,7 @@ dependencies:
   fl_chart: ^1.2.0
   shadcn_ui: ^0.54.0
   google_fonts: ^8.1.0
+  gap: ^3.0.1
 
 dev_dependencies:
   flutter_test:
