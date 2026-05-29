@@ -321,21 +321,21 @@ class AppTheme {
 
         titleLarge: GoogleFonts.spaceGrotesk(fontSize: 18, fontWeight: FontWeight.w600, color: foreground),
 
-        titleMedium: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600, color: foreground),
+        titleMedium: GoogleFonts.spaceGrotesk(fontSize: 16, fontWeight: FontWeight.w600, color: foreground),
 
-        titleSmall: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w500, color: foreground),
+        titleSmall: GoogleFonts.spaceGrotesk(fontSize: 14, fontWeight: FontWeight.w500, color: foreground),
 
-        bodyLarge: GoogleFonts.inter(fontSize: 16, height: 1.5, color: foreground),
+        bodyLarge: GoogleFonts.spaceGrotesk(fontSize: 16, height: 1.5, color: foreground),
 
-        bodyMedium: GoogleFonts.inter(fontSize: 14, height: 1.4, color: foreground),
+        bodyMedium: GoogleFonts.spaceGrotesk(fontSize: 14, height: 1.4, color: foreground),
 
-        bodySmall: GoogleFonts.inter(fontSize: 12, height: 1.4, color: subtleForeground),
+        bodySmall: GoogleFonts.spaceGrotesk(fontSize: 12, height: 1.4, color: subtleForeground),
 
-        labelLarge: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: foreground),
+        labelLarge: GoogleFonts.spaceGrotesk(fontSize: 14, fontWeight: FontWeight.w600, color: foreground),
 
-        labelMedium: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w500, color: foreground),
+        labelMedium: GoogleFonts.spaceGrotesk(fontSize: 12, fontWeight: FontWeight.w500, color: foreground),
 
-        labelSmall: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.w600, color: subtleForeground),
+        labelSmall: GoogleFonts.spaceGrotesk(fontSize: 10, fontWeight: FontWeight.w600, color: subtleForeground),
       ),
     );
   }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gap/gap.dart';
 
 // ─── Section Header ───────────────────────────────────────────────────────────
 
@@ -10,21 +11,20 @@ class SectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(4, 5, 4, 0),
-      child: Row(
-        children: [
-          Text(
-            title,
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-              color: Theme.of(context).colorScheme.primary,
-              // letterSpacing: 1.0,
-              fontWeight: FontWeight.w700,
-            ),
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          title,
+          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+            color: Theme.of(context).colorScheme.primary,
+            fontSize: 22,
+            fontWeight: FontWeight.w600,
           ),
-          if (trailing != null) ...[const Spacer(), trailing!],
-        ],
-      ),
+        ),
+        if (trailing != null) trailing!,
+      ],
     );
   }
 }
@@ -86,6 +86,8 @@ class ProgressCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            const SectionHeader(title: 'Monthly Budget'),
+            Gap(10),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [

@@ -75,9 +75,7 @@ class RoutineFuelApp extends StatelessWidget {
         darkTheme: AppTheme.darkTheme(),
         themeMode: settings.themeMode,
         routerConfig: appRouter,
-        localizationsDelegates: const [
-          GlobalShadLocalizations.delegate,
-        ],
+        localizationsDelegates: const [GlobalShadLocalizations.delegate],
         builder: (context, child) => ShadAppBuilder(child: child!),
       ),
     );

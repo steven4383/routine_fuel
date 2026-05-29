@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gap/gap.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../../providers/habit_provider.dart';
@@ -61,37 +62,47 @@ class DashboardScreen extends StatelessWidget {
             ),
           ),
           SliverPadding(
-            padding: const EdgeInsets.symmetric(horizontal: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 8),
             sliver: SliverList(
               delegate: SliverChildListDelegate([
                 // Today's habits summary
-                const SectionHeader(title: "Today's Habits"),
                 _TodayHabitsCard(habits: habits),
 
                 // Low stock alerts
                 if (lowStockItems.isNotEmpty) ...[
-                  SectionHeader(
-                    title: 'Low Stock Alerts',
-                    trailing: TextButton(onPressed: () => context.go('/inventory'), child: const Text('View all')),
-                  ),
-                  ...lowStockItems
-                      .take(3)
-                      .map(
-                        (item) => Padding(
-                          padding: const EdgeInsets.only(bottom: 6),
-                          child: AlertBanner(
-                            message:
-                                '${item.name}: ${item.quantity % 1 == 0 ? item.quantity.toInt() : item.quantity} ${item.unitLabel} left (min: ${item.minimumThreshold.toInt()})',
-                            color: Colors.orange.shade700,
-                            icon: Icons.warning_amber_rounded,
-                            onTap: () => context.go('/inventory'),
+                  Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        children: [
+                          SectionHeader(
+                            title: 'Low Stock Alerts',
+                            trailing: TextButton(
+                              onPressed: () => context.go('/inventory'),
+                              child: const Text('View all'),
+                            ),
                           ),
-                        ),
+                          ...lowStockItems
+                              .take(3)
+                              .map(
+                                (item) => Padding(
+                                  padding: const EdgeInsets.only(bottom: 6),
+                                  child: AlertBanner(
+                                    message:
+                                        '${item.name}: ${item.quantity % 1 == 0 ? item.quantity.toInt() : item.quantity} ${item.unitLabel} left (min: ${item.minimumThreshold.toInt()})',
+                                    color: colorScheme.secondary,
+                                    icon: Icons.warning_amber_rounded,
+                                    onTap: () => context.go('/inventory'),
+                                  ),
+                                ),
+                              ),
+                        ],
                       ),
+                    ),
+                  ),
                 ],
 
                 // Monthly spending
-                const SectionHeader(title: 'Monthly Budget'),
                 ProgressCard(
                   label: AppUtils.formatMonthYear(DateTime.now()),
                   value: budget > 0 ? (monthSpend / budget).clamp(0, 1) : 0,
@@ -101,23 +112,33 @@ class DashboardScreen extends StatelessWidget {
                 ),
 
                 // Quick actions
-                const SectionHeader(title: 'Quick Actions'),
                 _QuickActionsGrid(),
 
                 // Shopping list summary
-                if (shopping.pending.isNotEmpty) ...[
-                  SectionHeader(
-                    title: 'Shopping List',
-                    trailing: TextButton(onPressed: () => context.go('/shopping'), child: const Text('View all')),
+                if (shopping.pending.isNotEmpty)
+                  Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        children: [
+                          SectionHeader(
+                            title: 'Shopping List',
+                            trailing: TextButton(
+                              onPressed: () => context.go('/shopping'),
+                              child: const Text('View all'),
+                            ),
+                          ),
+                          AlertBanner(
+                            message:
+                                '${shopping.pending.length} item${shopping.pending.length > 1 ? 's' : ''} waiting to be purchased',
+                            color: colorScheme.secondary,
+                            icon: Icons.shopping_cart_rounded,
+                            onTap: () => context.go('/shopping'),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
-                  AlertBanner(
-                    message:
-                        '${shopping.pending.length} item${shopping.pending.length > 1 ? 's' : ''} waiting to be purchased',
-                    color: colorScheme.secondary,
-                    icon: Icons.shopping_cart_rounded,
-                    onTap: () => context.go('/shopping'),
-                  ),
-                ],
 
                 const SizedBox(height: 24),
               ]),
@@ -169,14 +190,23 @@ class _TodayHabitsCard extends StatelessWidget {
     if (all.isEmpty) {
       return Card(
         child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Row(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
             children: [
-              Icon(Icons.add_task_rounded, color: Theme.of(context).colorScheme.primary),
-              const SizedBox(width: 12),
-              Text(
-                'No habits yet — add your first!',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 14),
+              const SectionHeader(title: "Today's Habits"),
+              Gap(10),
+              Padding(
+                padding: const EdgeInsets.only(left: 18.0, right: 8.0, bottom: 18, top: 10),
+                child: Row(
+                  children: [
+                    Icon(Icons.add_task_rounded, color: Theme.of(context).colorScheme.primary),
+                    const SizedBox(width: 12),
+                    Text(
+                      'No habits yet — add your first!',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 15),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
@@ -265,36 +295,50 @@ class _QuickActionsGrid extends StatelessWidget {
       ),
     ];
 
-    return GridView.count(
-      crossAxisCount: 2,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      crossAxisSpacing: 8,
-      // mainAxisSpacing: 8,
-      childAspectRatio: 2.0,
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            const SectionHeader(title: 'Quick Actions'),
+            Padding(
+              padding: const EdgeInsets.only(top: 8.0),
+              child: GridView.count(
+                crossAxisCount: 2,
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                crossAxisSpacing: 2,
+                padding: EdgeInsets.all(0),
 
-      children: actions
-          .map(
-            (a) => SizedBox(
-              height: 20,
-              child: Card(
-                child: InkWell(
-                  onTap: () => context.go(a.route),
-                  borderRadius: BorderRadius.circular(8),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(a.icon, size: 20, color: a.color),
-                      const SizedBox(width: 10),
-                      Text(a.label, style: Theme.of(context).textTheme.titleSmall?.copyWith(color: a.color)),
-                    ],
-                  ),
-                ),
+                // mainAxisSpacing: 8,
+                childAspectRatio: 2.0,
+                children: actions
+                    .map(
+                      (a) => SizedBox(
+                        height: 10,
+                        child: Card(
+                          child: InkWell(
+                            onTap: () => context.go(a.route),
+                            borderRadius: BorderRadius.circular(8),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(a.icon, size: 20, color: a.color),
+                                const SizedBox(width: 10),
+                                Text(a.label, style: Theme.of(context).textTheme.titleSmall?.copyWith(color: a.color)),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    )
+                    .toList(),
               ),
             ),
-          )
-          .toList(),
+          ],
+        ),
+      ),
     );
   }
 }

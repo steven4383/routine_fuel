@@ -15,37 +15,15 @@ final appRouter = GoRouter(
   routes: [
     ShellRoute(
       navigatorKey: _shellKey,
-      builder: (context, state, child) =>
-          AppShell(child: child, state: state),
+      builder: (context, state, child) => AppShell(child: child, state: state),
       routes: [
-        GoRoute(
-          path: '/dashboard',
-          builder: (_, __) => const DashboardScreen(),
-        ),
-        GoRoute(
-          path: '/habits',
-          builder: (_, __) => const HabitsScreen(),
-        ),
-        GoRoute(
-          path: '/inventory',
-          builder: (_, __) => const InventoryScreen(),
-        ),
-        GoRoute(
-          path: '/shopping',
-          builder: (_, __) => const ShoppingScreen(),
-        ),
-        GoRoute(
-          path: '/expenses',
-          builder: (_, __) => const ExpensesScreen(),
-        ),
-        GoRoute(
-          path: '/analytics',
-          builder: (_, __) => const AnalyticsScreen(),
-        ),
-        GoRoute(
-          path: '/settings',
-          builder: (_, __) => const SettingsScreen(),
-        ),
+        GoRoute(path: '/dashboard', builder: (_, __) => const DashboardScreen()),
+        GoRoute(path: '/habits', builder: (_, __) => const HabitsScreen()),
+        GoRoute(path: '/inventory', builder: (_, __) => const InventoryScreen()),
+        GoRoute(path: '/shopping', builder: (_, __) => const ShoppingScreen()),
+        GoRoute(path: '/expenses', builder: (_, __) => const ExpensesScreen()),
+        GoRoute(path: '/analytics', builder: (_, __) => const AnalyticsScreen()),
+        GoRoute(path: '/settings', builder: (_, __) => const SettingsScreen()),
       ],
     ),
   ],
@@ -57,14 +35,7 @@ class AppShell extends StatelessWidget {
 
   const AppShell({super.key, required this.child, required this.state});
 
-  static const _tabs = [
-    '/dashboard',
-    '/habits',
-    '/inventory',
-    '/shopping',
-    '/analytics',
-    '/settings',
-  ];
+  static const _tabs = ['/dashboard', '/habits', '/inventory', '/shopping', '/analytics', '/settings'];
 
   int get _currentIndex {
     final loc = state.matchedLocation;

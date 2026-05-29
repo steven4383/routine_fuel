@@ -44,18 +44,11 @@ class BackupService {
 
       final json = const JsonEncoder.withIndent('  ').convert(backup);
       final dir = await getApplicationDocumentsDirectory();
-      final timestamp = DateTime.now()
-          .toIso8601String()
-          .replaceAll(':', '-')
-          .replaceAll('.', '-')
-          .substring(0, 19);
+      final timestamp = DateTime.now().toIso8601String().replaceAll(':', '-').replaceAll('.', '-').substring(0, 19);
       final file = File('${dir.path}/routinefuel_backup_$timestamp.json');
       await file.writeAsString(json);
 
-      await Share.shareXFiles(
-        [XFile(file.path)],
-        subject: 'RoutineFuel Backup',
-      );
+      await Share.shareXFiles([XFile(file.path)], subject: 'RoutineFuel Backup');
       return true;
     } catch (e) {
       return false;
@@ -64,10 +57,7 @@ class BackupService {
 
   Future<bool> importBackup() async {
     try {
-      final result = await FilePicker.platform.pickFiles(
-        type: FileType.custom,
-        allowedExtensions: ['json'],
-      );
+      final result = await FilePicker.platform.pickFiles(type: FileType.custom, allowedExtensions: ['json']);
       if (result == null || result.files.isEmpty) return false;
 
       final path = result.files.first.path;
