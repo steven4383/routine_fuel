@@ -15,15 +15,15 @@ final appRouter = GoRouter(
   routes: [
     ShellRoute(
       navigatorKey: _shellKey,
-      builder: (context, state, child) => AppShell(child: child, state: state),
+      builder: (context, state, child) => AppShell(state: state, child: child),
       routes: [
-        GoRoute(path: '/dashboard', builder: (_, __) => const DashboardScreen()),
-        GoRoute(path: '/habits', builder: (_, __) => const HabitsScreen()),
-        GoRoute(path: '/inventory', builder: (_, __) => const InventoryScreen()),
-        GoRoute(path: '/shopping', builder: (_, __) => const ShoppingScreen()),
-        GoRoute(path: '/expenses', builder: (_, __) => const ExpensesScreen()),
-        GoRoute(path: '/analytics', builder: (_, __) => const AnalyticsScreen()),
-        GoRoute(path: '/settings', builder: (_, __) => const SettingsScreen()),
+        GoRoute(path: '/dashboard', builder: (_, _) => const DashboardScreen()),
+        GoRoute(path: '/habits', builder: (_, _) => const HabitsScreen()),
+        GoRoute(path: '/inventory', builder: (_, _) => const InventoryScreen()),
+        GoRoute(path: '/shopping', builder: (_, _) => const ShoppingScreen()),
+        GoRoute(path: '/expenses', builder: (_, _) => const ExpensesScreen()),
+        GoRoute(path: '/analytics', builder: (_, _) => const AnalyticsScreen()),
+        GoRoute(path: '/settings', builder: (_, _) => const SettingsScreen()),
       ],
     ),
   ],

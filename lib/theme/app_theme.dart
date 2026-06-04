@@ -152,7 +152,7 @@ class AppTheme {
         titleTextStyle: GoogleFonts.spaceGrotesk(
           fontSize: 22,
           fontWeight: FontWeight.w700,
-          letterSpacing: -0.5,
+          letterSpacing: 0,
           color: foreground,
         ),
       ),
@@ -164,8 +164,24 @@ class AppTheme {
         elevation: 0,
         color: surface,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(8),
           side: BorderSide(color: borderColor, width: 1),
+        ),
+      ),
+
+      bottomSheetTheme: BottomSheetThemeData(
+        backgroundColor: surface,
+        modalBackgroundColor: surface,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(8)),
+        ),
+      ),
+
+      dialogTheme: DialogThemeData(
+        backgroundColor: surface,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+          side: BorderSide(color: borderColor),
         ),
       ),
 
@@ -175,7 +191,7 @@ class AppTheme {
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: surface,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        // contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         border: _inputBorder(borderColor),
         enabledBorder: _inputBorder(borderColor),
         focusedBorder: _inputBorder(accent, width: 1.5),
@@ -227,7 +243,7 @@ class AppTheme {
         labelStyle: GoogleFonts.inter(fontSize: 12, color: foreground),
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(8),
           side: BorderSide(color: borderColor),
         ),
       ),
@@ -279,6 +295,16 @@ class AppTheme {
       // =========================
       listTileTheme: const ListTileThemeData(contentPadding: EdgeInsets.symmetric(horizontal: 18, vertical: 6)),
 
+      checkboxTheme: CheckboxThemeData(
+        fillColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) return accent;
+          return Colors.transparent;
+        }),
+        checkColor: WidgetStateProperty.all(Colors.white),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+        side: BorderSide(color: borderColor, width: 1.5),
+      ),
+
       // =========================
       // SWITCH
       // =========================
@@ -306,14 +332,14 @@ class AppTheme {
         headlineLarge: GoogleFonts.spaceGrotesk(
           fontSize: 32,
           fontWeight: FontWeight.w700,
-          letterSpacing: -1,
+          letterSpacing: 0,
           color: foreground,
         ),
 
         headlineMedium: GoogleFonts.spaceGrotesk(
           fontSize: 26,
           fontWeight: FontWeight.w700,
-          letterSpacing: -0.5,
+          letterSpacing: 0,
           color: foreground,
         ),
 
@@ -346,7 +372,7 @@ class AppTheme {
 
   static OutlineInputBorder _inputBorder(Color color, {double width = 1}) {
     return OutlineInputBorder(
-      borderRadius: BorderRadius.circular(14),
+      borderRadius: BorderRadius.circular(8),
       borderSide: BorderSide(color: color, width: width),
     );
   }

@@ -28,7 +28,10 @@ class HabitCompletionService {
     required this.shoppingProvider,
   });
 
-  Future<CompletionResult> toggleHabit(String habitId) async {
+  Future<CompletionResult> toggleHabit(
+    String habitId, {
+    Map<String, double> quantityOverrides = const {},
+  }) async {
     // Toggle in habit provider — returns linked items only when marking done
     final linkedItems = await habitProvider.toggleCompletion(habitId);
 
@@ -51,8 +54,9 @@ class HabitCompletionService {
     for (final linked in linkedItems) {
       final item = inventoryProvider.getById(linked.inventoryItemId);
       if (item == null) continue;
+      final quantity = quantityOverrides[linked.inventoryItemId] ?? linked.quantity;
       final success = await inventoryProvider.deductQuantity(
-          linked.inventoryItemId, linked.quantity);
+          linked.inventoryItemId, quantity);
       if (!success) {
         insufficientItems.add(item.name);
       } else {

@@ -62,7 +62,7 @@ class _HabitList extends StatelessWidget {
     final stats = habitProvider.weeklyCompletionRate();
 
     return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
+      padding: const EdgeInsets.fromLTRB(14, 8, 14, 100),
       children: [
         // Weekly overview card
         _WeeklyOverviewCard(stats: stats),
@@ -71,19 +71,23 @@ class _HabitList extends StatelessWidget {
         ...categories.map((cat) {
           final catHabits = habitProvider.byCategory(cat);
           if (catHabits.isEmpty) return const SizedBox.shrink();
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SectionHeader(
-                title: _categoryLabel(cat),
-                trailing: Icon(
-                  AppUtils.habitCategoryIcon(cat),
-                  size: 16,
-                  color: AppUtils.habitCategoryColor(cat),
-                ),
+          return Card(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
+              child: Column(
+                children: [
+                  SectionHeader(
+                    title: _categoryLabel(cat),
+                    trailing: Icon(
+                      AppUtils.habitCategoryIcon(cat),
+                      size: 16,
+                      color: AppUtils.habitCategoryColor(cat),
+                    ),
+                  ),
+                  ...catHabits.map((h) => _HabitCard(habit: h)),
+                ],
               ),
-              ...catHabits.map((h) => _HabitCard(habit: h)),
-            ],
+            ),
           );
         }),
       ],
@@ -113,12 +117,11 @@ class _WeeklyOverviewCard extends StatelessWidget {
     final color = Theme.of(context).colorScheme.primary;
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(14),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('This Week',
-                style: Theme.of(context).textTheme.titleSmall),
+            const SectionHeader(title: 'This Week'),
             const SizedBox(height: 14),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -137,7 +140,7 @@ class _WeeklyOverviewCard extends StatelessWidget {
                             : e.value > 0
                                 ? color.withOpacity(0.35)
                                 : color.withOpacity(0.08),
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(6),
                         border: isToday
                             ? Border.all(color: color, width: 2)
                             : null,
@@ -169,6 +172,211 @@ class _WeeklyOverviewCard extends StatelessWidget {
   }
 }
 
+class _DeductionQuantitySheet extends StatefulWidget {
+  final HabitModel habit;
+
+  const _DeductionQuantitySheet({required this.habit});
+
+  @override
+  State<_DeductionQuantitySheet> createState() => _DeductionQuantitySheetState();
+}
+
+class _DeductionQuantitySheetState extends State<_DeductionQuantitySheet> {
+  final Map<String, TextEditingController> _controllers = {};
+
+  @override
+  void initState() {
+    super.initState();
+    for (final link in widget.habit.linkedItems) {
+      _controllers[link.inventoryItemId] = TextEditingController(text: _formatQty(link.quantity));
+    }
+  }
+
+  @override
+  void dispose() {
+    for (final controller in _controllers.values) {
+      controller.dispose();
+    }
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final inventory = context.read<InventoryProvider>();
+
+    return Padding(
+      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(18, 12, 18, 18),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
+          border: const Border(top: BorderSide(color: Color(0xFFE8E8E8))),
+        ),
+        child: SafeArea(
+          top: false,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 18),
+              Text('Inventory Used Today', style: Theme.of(context).textTheme.titleLarge),
+              const SizedBox(height: 4),
+              Text(
+                'Set the amount for this check only before the habit is marked done.',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey.shade500),
+              ),
+              const SizedBox(height: 6),
+              Text(widget.habit.title, style: Theme.of(context).textTheme.titleSmall),
+              const SizedBox(height: 16),
+              ...widget.habit.linkedItems.map((link) {
+                final item = inventory.getById(link.inventoryItemId);
+                final unit = item?.unitLabel ?? '';
+                return Container(
+                  margin: const EdgeInsets.only(bottom: 10),
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF7F7F7),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: const Color(0xFFE8E8E8)),
+                  ),
+                  child: Column(
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            width: 42,
+                            height: 42,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFFF3B0A).withOpacity(0.08),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Icon(Icons.inventory_2_rounded, color: Color(0xFFFF3B0A), size: 20),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(item?.name ?? link.inventoryItemId, style: Theme.of(context).textTheme.titleSmall),
+                                if (item != null)
+                                  Text(
+                                    '${_formatQty(item.quantity)} $unit in stock',
+                                    style: Theme.of(context).textTheme.bodySmall,
+                                  ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          SizedBox(
+                            width: 118,
+                            child: TextFormField(
+                              controller: _controllers[link.inventoryItemId],
+                              textAlign: TextAlign.end,
+                              decoration: InputDecoration(
+                                labelText: 'Used',
+                                suffixText: unit,
+                                isDense: true,
+                              ),
+                              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Text(
+                            'Default: ${_formatQty(link.quantity)} $unit',
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                          const Spacer(),
+                          TextButton(
+                            onPressed: () {
+                              _controllers[link.inventoryItemId]?.text = _formatQty(link.quantity);
+                            },
+                            child: const Text('Reset'),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                );
+              }),
+              const SizedBox(height: 2),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFF3B0A).withOpacity(0.07),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: const Color(0xFFFF3B0A).withOpacity(0.18)),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.tips_and_updates_rounded, color: Color(0xFFFF3B0A), size: 18),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Example: type 1 if you only ate 1 egg today.',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(color: const Color(0xFF211D22)),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('Cancel'),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: _save,
+                      child: const Text('Check'),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _save() {
+    final values = <String, double>{};
+    for (final entry in _controllers.entries) {
+      final quantity = double.tryParse(entry.value.text.trim());
+      if (quantity == null || quantity <= 0) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Enter a valid quantity.')),
+        );
+        return;
+      }
+      values[entry.key] = quantity;
+    }
+    Navigator.pop(context, values);
+  }
+
+  String _formatQty(double value) => value % 1 == 0 ? value.toInt().toString() : value.toString();
+}
+
 class _HabitCard extends StatefulWidget {
   final HabitModel habit;
   const _HabitCard({required this.habit});
@@ -182,6 +390,15 @@ class _HabitCardState extends State<_HabitCard> {
 
   Future<void> _toggle() async {
     if (_loading) return;
+    final habit = widget.habit;
+    Map<String, double> quantityOverrides = const {};
+
+    if (!habit.isCompletedToday() && habit.linkedItems.isNotEmpty) {
+      final picked = await _showDeductionSheet(habit);
+      if (picked == null) return;
+      quantityOverrides = picked;
+    }
+
     setState(() => _loading = true);
 
     final service = HabitCompletionService(
@@ -190,7 +407,10 @@ class _HabitCardState extends State<_HabitCard> {
       shoppingProvider: context.read<ShoppingProvider>(),
     );
 
-    final result = await service.toggleHabit(widget.habit.id);
+    final result = await service.toggleHabit(
+      widget.habit.id,
+      quantityOverrides: quantityOverrides,
+    );
 
     if (mounted) {
       setState(() => _loading = false);
@@ -230,6 +450,16 @@ class _HabitCardState extends State<_HabitCard> {
               child: const Text('OK')),
         ],
       ),
+    );
+  }
+
+  Future<Map<String, double>?> _showDeductionSheet(HabitModel habit) {
+    return showModalBottomSheet<Map<String, double>>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _DeductionQuantitySheet(habit: habit),
     );
   }
 
@@ -283,32 +513,37 @@ class _HabitCardState extends State<_HabitCard> {
     final colorScheme = Theme.of(context).colorScheme;
     final catColor = AppUtils.habitCategoryColor(habit.category);
 
-    return Card(
-      child: InkWell(
-        onLongPress: _showOptions,
-        borderRadius: BorderRadius.circular(16),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-          child: Row(
+    return InkWell(
+      onTap: _toggle,
+      onLongPress: _showOptions,
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 8),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: isDone ? const Color(0xFFFF3B0A).withOpacity(0.06) : const Color(0xFFF7F7F7),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: isDone ? const Color(0xFFFF3B0A).withOpacity(0.2) : const Color(0xFFE8E8E8)),
+        ),
+        child: Row(
             children: [
               // Completion toggle
-              GestureDetector(
-                onTap: _toggle,
+              IgnorePointer(
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
-                  width: 36,
-                  height: 36,
+                  width: 34,
+                  height: 34,
                   decoration: BoxDecoration(
                     color: isDone
-                        ? Colors.green.shade600
+                        ? const Color(0xFFFF3B0A)
                         : Colors.transparent,
                     border: Border.all(
                       color: isDone
-                          ? Colors.green.shade600
+                          ? const Color(0xFFFF3B0A)
                           : Colors.grey.shade400,
                       width: 2,
                     ),
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(6),
                   ),
                   child: _loading
                       ? Padding(
@@ -376,9 +611,9 @@ class _HabitCardState extends State<_HabitCard> {
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
                     color: Colors.orange.shade50,
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(6),
                   ),
-                  child: Text('🔥 ${habit.currentStreak}',
+                  child: Text('${habit.currentStreak} day',
                       style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w700,
@@ -386,10 +621,13 @@ class _HabitCardState extends State<_HabitCard> {
                 ),
 
               const SizedBox(width: 6),
-              Icon(Icons.more_vert_rounded,
-                  size: 18, color: Colors.grey.shade400),
+              IconButton(
+                onPressed: _showOptions,
+                icon: const Icon(Icons.more_vert_rounded),
+                iconSize: 18,
+                color: Colors.grey.shade400,
+              ),
             ],
-          ),
         ),
       ),
     );

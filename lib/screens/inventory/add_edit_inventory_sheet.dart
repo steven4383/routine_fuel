@@ -10,8 +10,7 @@ class AddEditInventorySheet extends StatefulWidget {
   const AddEditInventorySheet({super.key, this.item});
 
   @override
-  State<AddEditInventorySheet> createState() =>
-      _AddEditInventorySheetState();
+  State<AddEditInventorySheet> createState() => _AddEditInventorySheetState();
 }
 
 class _AddEditInventorySheetState extends State<AddEditInventorySheet> {
@@ -32,17 +31,12 @@ class _AddEditInventorySheetState extends State<AddEditInventorySheet> {
     final item = widget.item;
     _nameCtrl = TextEditingController(text: item?.name ?? '');
     _qtyCtrl = TextEditingController(
-        text: item != null
-            ? (item.quantity % 1 == 0
-                ? item.quantity.toInt().toString()
-                : item.quantity.toString())
-            : '');
-    _minCtrl = TextEditingController(
-        text: item?.minimumThreshold.toInt().toString() ?? '2');
+      text: item != null ? (item.quantity % 1 == 0 ? item.quantity.toInt().toString() : item.quantity.toString()) : '',
+    );
+    _minCtrl = TextEditingController(text: item?.minimumThreshold.toInt().toString() ?? '2');
     _priceCtrl = TextEditingController(
-        text: item?.pricePerUnit != null && item!.pricePerUnit > 0
-            ? item.pricePerUnit.toStringAsFixed(0)
-            : '');
+      text: item?.pricePerUnit != null && item!.pricePerUnit > 0 ? item.pricePerUnit.toStringAsFixed(0) : '',
+    );
     _unit = item?.unit ?? UnitType.piece;
     _category = item?.category ?? InventoryCategory.other;
   }
@@ -62,13 +56,9 @@ class _AddEditInventorySheetState extends State<AddEditInventorySheet> {
     final provider = context.read<InventoryProvider>();
 
     // Check for duplicates
-    if (provider.hasDuplicate(_nameCtrl.text.trim(),
-        excludeId: widget.item?.id)) {
+    if (provider.hasDuplicate(_nameCtrl.text.trim(), excludeId: widget.item?.id)) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('An item with this name already exists.'),
-          backgroundColor: Colors.red,
-        ),
+        const SnackBar(content: Text('An item with this name already exists.'), backgroundColor: Colors.red),
       );
       return;
     }
@@ -102,9 +92,7 @@ class _AddEditInventorySheetState extends State<AddEditInventorySheet> {
     }
 
     // Sync shopping list
-    await context
-        .read<ShoppingProvider>()
-        .syncFromInventory(provider.lowStockItems);
+    await context.read<ShoppingProvider>().syncFromInventory(provider.lowStockItems);
 
     if (mounted) Navigator.pop(context);
   }
@@ -112,8 +100,7 @@ class _AddEditInventorySheetState extends State<AddEditInventorySheet> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom),
+      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
       child: DraggableScrollableSheet(
         initialChildSize: 0.85,
         minChildSize: 0.5,
@@ -126,26 +113,16 @@ class _AddEditInventorySheetState extends State<AddEditInventorySheet> {
                 margin: const EdgeInsets.only(top: 12, bottom: 4),
                 width: 40,
                 height: 4,
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade300,
-                  borderRadius: BorderRadius.circular(2),
-                ),
+                decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(2)),
               ),
             ),
             Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
               child: Row(
                 children: [
-                  Text(
-                    _isEditing ? 'Edit Item' : 'New Inventory Item',
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
+                  Text(_isEditing ? 'Edit Item' : 'New Inventory Item', style: Theme.of(context).textTheme.titleLarge),
                   const Spacer(),
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: const Text('Cancel'),
-                  ),
+                  TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
                 ],
               ),
             ),
@@ -168,8 +145,7 @@ class _AddEditInventorySheetState extends State<AddEditInventorySheet> {
                           prefixIcon: Icon(Icons.label_rounded),
                         ),
                         textCapitalization: TextCapitalization.words,
-                        validator: (v) =>
-                            AppUtils.validateRequired(v, 'Name'),
+                        validator: (v) => AppUtils.validateRequired(v, 'Name'),
                       ),
                       const SizedBox(height: 14),
 
@@ -182,31 +158,19 @@ class _AddEditInventorySheetState extends State<AddEditInventorySheet> {
                               controller: _qtyCtrl,
                               decoration: const InputDecoration(
                                 labelText: 'Quantity *',
-                                prefixIcon:
-                                    Icon(Icons.numbers_rounded),
+                                prefixIcon: Icon(Icons.numbers_rounded),
                               ),
-                              keyboardType:
-                                  const TextInputType.numberWithOptions(
-                                      decimal: true),
-                              validator: (v) =>
-                                  AppUtils.validatePositiveNumber(
-                                      v, 'Quantity'),
+                              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                              validator: (v) => AppUtils.validatePositiveNumber(v, 'Quantity'),
                             ),
                           ),
                           const SizedBox(width: 10),
                           Expanded(
                             flex: 2,
-                            child: DropdownButtonFormField<UnitType>(
-                              value: _unit,
-                              decoration: const InputDecoration(
-                                  labelText: 'Unit'),
-                              items: UnitType.values
-                                  .map((u) => DropdownMenuItem(
-                                      value: u,
-                                      child: Text(_unitLabel(u))))
-                                  .toList(),
-                              onChanged: (v) =>
-                                  setState(() => _unit = v!),
+                            child: _UnitPickerField(
+                              unit: _unit,
+                              labelFor: _unitLabel,
+                              onChanged: (unit) => setState(() => _unit = unit),
                             ),
                           ),
                         ],
@@ -219,15 +183,10 @@ class _AddEditInventorySheetState extends State<AddEditInventorySheet> {
                         decoration: const InputDecoration(
                           labelText: 'Minimum Threshold *',
                           hintText: 'Trigger low stock alert',
-                          prefixIcon:
-                              Icon(Icons.warning_amber_rounded),
+                          prefixIcon: Icon(Icons.warning_amber_rounded),
                         ),
-                        keyboardType:
-                            const TextInputType.numberWithOptions(
-                                decimal: true),
-                        validator: (v) =>
-                            AppUtils.validatePositiveNumber(
-                                v, 'Threshold'),
+                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                        validator: (v) => AppUtils.validatePositiveNumber(v, 'Threshold'),
                       ),
                       const SizedBox(height: 14),
 
@@ -239,35 +198,26 @@ class _AddEditInventorySheetState extends State<AddEditInventorySheet> {
                           prefixIcon: Icon(Icons.currency_rupee),
                           hintText: '0',
                         ),
-                        keyboardType:
-                            const TextInputType.numberWithOptions(
-                                decimal: true),
+                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
                       ),
                       const SizedBox(height: 20),
 
                       // Category
-                      Text('Category',
-                          style: Theme.of(context).textTheme.titleSmall),
+                      Text('Category', style: Theme.of(context).textTheme.titleSmall),
                       const SizedBox(height: 10),
                       Wrap(
                         spacing: 8,
                         runSpacing: 8,
                         children: InventoryCategory.values.map((cat) {
                           final selected = _category == cat;
-                          final color =
-                              AppUtils.categoryColor(cat, context);
+                          final color = AppUtils.categoryColor(cat, context);
                           return ChoiceChip(
                             label: Text(cat.categoryLabel),
-                            avatar: Icon(AppUtils.categoryIcon(cat),
-                                size: 16,
-                                color:
-                                    selected ? Colors.white : color),
+                            avatar: Icon(AppUtils.categoryIcon(cat), size: 16, color: selected ? Colors.white : color),
                             selected: selected,
                             selectedColor: color,
-                            labelStyle: TextStyle(
-                                color: selected ? Colors.white : null),
-                            onSelected: (_) =>
-                                setState(() => _category = cat),
+                            labelStyle: TextStyle(color: selected ? Colors.white : null),
+                            onSelected: (_) => setState(() => _category = cat),
                           );
                         }).toList(),
                       ),
@@ -281,13 +231,9 @@ class _AddEditInventorySheetState extends State<AddEditInventorySheet> {
                               ? const SizedBox(
                                   height: 20,
                                   width: 20,
-                                  child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      color: Colors.white),
+                                  child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                                 )
-                              : Text(_isEditing
-                                  ? 'Save Changes'
-                                  : 'Add Item'),
+                              : Text(_isEditing ? 'Save Changes' : 'Add Item'),
                         ),
                       ),
                     ],
@@ -314,5 +260,100 @@ class _AddEditInventorySheetState extends State<AddEditInventorySheet> {
       case UnitType.packet:
         return 'Packet';
     }
+  }
+}
+
+class _UnitPickerField extends StatelessWidget {
+  final UnitType unit;
+  final String Function(UnitType unit) labelFor;
+  final ValueChanged<UnitType> onChanged;
+
+  const _UnitPickerField({required this.unit, required this.labelFor, required this.onChanged});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: () => _showPicker(context),
+      borderRadius: BorderRadius.circular(8),
+      child: InputDecorator(
+        decoration: const InputDecoration(labelText: 'Unit', suffixIcon: Icon(Icons.keyboard_arrow_down_rounded)),
+        child: Text(labelFor(unit), style: Theme.of(context).textTheme.bodyMedium),
+      ),
+    );
+  }
+
+  void _showPicker(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      useSafeArea: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Container(
+        margin: const EdgeInsets.all(8),
+        padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
+        decoration: BoxDecoration(
+          color: Theme.of(ctx).colorScheme.surface,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: const Color(0xFFE8E8E8)),
+        ),
+        child: SafeArea(
+          top: false,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 40,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: 12),
+                decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(2)),
+              ),
+              Row(
+                children: [
+                  Text('Unit', style: Theme.of(ctx).textTheme.titleLarge),
+                  const Spacer(),
+                  IconButton(onPressed: () => Navigator.pop(ctx), icon: const Icon(Icons.close_rounded)),
+                ],
+              ),
+              const SizedBox(height: 4),
+              ...UnitType.values.map((item) {
+                final selected = item == unit;
+                return InkWell(
+                  onTap: () {
+                    onChanged(item);
+                    Navigator.pop(ctx);
+                  },
+                  borderRadius: BorderRadius.circular(8),
+                  child: Container(
+                    width: double.infinity,
+                    height: 56,
+                    margin: const EdgeInsets.only(bottom: 6),
+                    alignment: Alignment.centerLeft,
+                    padding: const EdgeInsets.symmetric(horizontal: 14),
+                    decoration: BoxDecoration(
+                      color: selected ? const Color(0xFFFF3B0A) : const Color(0xFFF7F7F7),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: selected ? const Color(0xFFFF3B0A) : const Color(0xFFE8E8E8)),
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            labelFor(item),
+                            style: Theme.of(ctx).textTheme.titleMedium?.copyWith(
+                              color: selected ? Colors.white : const Color(0xFF111111),
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                        if (selected) const Icon(Icons.check_rounded, color: Colors.white, size: 20),
+                      ],
+                    ),
+                  ),
+                );
+              }),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

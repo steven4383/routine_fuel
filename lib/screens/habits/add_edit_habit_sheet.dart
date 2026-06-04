@@ -165,13 +165,14 @@ class _AddEditHabitSheetState extends State<AddEditHabitSheet> {
                         ),
                         maxLines: 2,
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 10),
 
                       // Category
                       Text('Category', style: Theme.of(context).textTheme.titleSmall),
-                      const SizedBox(height: 8),
+
                       Wrap(
                         spacing: 8,
+                        runSpacing: 8,
                         children: HabitCategory.values.map((cat) {
                           final selected = _category == cat;
                           final color = AppUtils.habitCategoryColor(cat);
@@ -192,11 +193,10 @@ class _AddEditHabitSheetState extends State<AddEditHabitSheet> {
                           );
                         }).toList(),
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 10),
 
                       // Repeat type
                       Text('Repeat', style: Theme.of(context).textTheme.titleSmall),
-                      const SizedBox(height: 8),
                       Row(
                         children: RepeatType.values.map((type) {
                           final selected = _repeatType == type;
@@ -352,7 +352,7 @@ class _LinkInventoryDialogState extends State<_LinkInventoryDialog> {
     setState(() {
       if (_isLinked(id)) {
         _links.removeWhere((l) => l.inventoryItemId == id);
-        _qtyControllers.remove(id);
+        _qtyControllers.remove(id)?.dispose();
       } else {
         _links.add(LinkedInventoryItem(inventoryItemId: id, quantity: 1));
         _qtyControllers[id] = TextEditingController(text: '1');
@@ -364,10 +364,33 @@ class _LinkInventoryDialogState extends State<_LinkInventoryDialog> {
   Widget build(BuildContext context) {
     final items = context.read<InventoryProvider>().items;
 
-    return AlertDialog(
-      title: const Text('Link Inventory Items'),
-      content: SizedBox(
+    return Dialog(
+      insetPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 24),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Text('Link Inventory Items', style: Theme.of(context).textTheme.titleLarge),
+                const Spacer(),
+                IconButton(
+                  onPressed: () => Navigator.pop(context),
+                  icon: const Icon(Icons.close_rounded),
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Set the default amount to deduct when this habit is checked.',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
         width: double.maxFinite,
+        height: MediaQuery.of(context).size.height * 0.58,
         child: items.isEmpty
             ? const Text('No inventory items yet. Add items first.')
             : ListView.builder(
@@ -376,20 +399,29 @@ class _LinkInventoryDialogState extends State<_LinkInventoryDialog> {
                 itemBuilder: (_, i) {
                   final item = items[i];
                   final linked = _isLinked(item.id);
-                  return Column(
-                    children: [
-                      CheckboxListTile(
-                        dense: true,
-                        value: linked,
-                        onChanged: (_) => _toggle(item.id, item.unitLabel),
-                        title: Text(item.name),
-                        subtitle: Text('${item.quantity} ${item.unitLabel} in stock'),
-                        secondary: Icon(
-                          AppUtils.categoryIcon(item.category),
-                          color: AppUtils.categoryColor(item.category, context),
-                          size: 20,
-                        ),
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: 8),
+                    decoration: BoxDecoration(
+                      color: linked ? const Color(0xFFFF3B0A).withOpacity(0.06) : const Color(0xFFF7F7F7),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: linked ? const Color(0xFFFF3B0A).withOpacity(0.22) : const Color(0xFFE8E8E8),
                       ),
+                    ),
+                    child: Column(
+                      children: [
+                        CheckboxListTile(
+                          dense: true,
+                          value: linked,
+                          onChanged: (_) => _toggle(item.id, item.unitLabel),
+                          title: Text(item.name, style: Theme.of(context).textTheme.titleSmall),
+                          subtitle: Text('${item.quantity} ${item.unitLabel} in stock'),
+                          secondary: Icon(
+                            AppUtils.categoryIcon(item.category),
+                            color: AppUtils.categoryColor(item.category, context),
+                            size: 20,
+                          ),
+                        ),
                       if (linked)
                         Padding(
                           padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
@@ -411,20 +443,35 @@ class _LinkInventoryDialogState extends State<_LinkInventoryDialog> {
                           ),
                         ),
                     ],
+                    ),
                   );
                 },
               ),
-      ),
-      actions: [
-        TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
-        ElevatedButton(
-          onPressed: () {
-            widget.onSave(_links);
-            Navigator.pop(context);
-          },
-          child: const Text('Save Links'),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('Cancel'),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      widget.onSave(_links);
+                      Navigator.pop(context);
+                    },
+                    child: const Text('Save'),
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 }

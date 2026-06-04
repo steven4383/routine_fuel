@@ -113,17 +113,26 @@ class _InventoryScreenState extends State<InventoryScreen> {
 
     final widgets = <Widget>[];
     for (final entry in grouped.entries) {
-      widgets.add(SectionHeader(
-        title: entry.key.name.toUpperCase(),
-        trailing: Icon(
-          AppUtils.categoryIcon(entry.key),
-          size: 16,
-          color: AppUtils.categoryColor(entry.key, context),
+      widgets.add(
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
+            child: Column(
+              children: [
+                SectionHeader(
+                  title: entry.key.categoryLabel,
+                  trailing: Icon(
+                    AppUtils.categoryIcon(entry.key),
+                    size: 16,
+                    color: AppUtils.categoryColor(entry.key, context),
+                  ),
+                ),
+                ...entry.value.map((item) => _InventoryCard(item: item)),
+              ],
+            ),
+          ),
         ),
-      ));
-      for (final item in entry.value) {
-        widgets.add(_InventoryCard(item: item));
-      }
+      );
     }
     return widgets;
   }
@@ -147,13 +156,18 @@ class _InventoryCard extends StatelessWidget {
     final isLow = item.isLowStock;
     final catColor = AppUtils.categoryColor(item.category, context);
 
-    return Card(
-      child: InkWell(
-        onLongPress: () => _showOptions(context),
-        borderRadius: BorderRadius.circular(16),
-        child: Padding(
-          padding: const EdgeInsets.all(14),
-          child: Row(
+    return InkWell(
+      onLongPress: () => _showOptions(context),
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 8),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF7F7F7),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: const Color(0xFFE8E8E8)),
+        ),
+        child: Row(
             children: [
               // Icon
               Container(
@@ -230,7 +244,6 @@ class _InventoryCard extends StatelessWidget {
                 onPressed: () => _showOptions(context),
               ),
             ],
-          ),
         ),
       ),
     );

@@ -31,68 +31,45 @@ class ExpensesScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: Column(
+      body: ListView(
+        padding: const EdgeInsets.fromLTRB(14, 8, 14, 100),
         children: [
-          // Summary cards
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-            child: Column(
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: StatCard(
-                        label: 'Today',
-                        value: AppUtils.formatAmountFull(
-                            expenses.todayTotal, symbol),
-                        icon: Icons.today_rounded,
-                        color: Colors.blue.shade600,
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: StatCard(
-                        label: 'This Month',
-                        value: AppUtils.formatAmountFull(monthSpend, symbol),
-                        icon: Icons.calendar_month_rounded,
-                        color: Colors.green.shade600,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                ProgressCard(
-                  label: 'Monthly Budget',
-                  value: budget > 0 ? (monthSpend / budget).clamp(0, 1) : 0,
-                  subtitle:
-                      '$symbol${monthSpend.toStringAsFixed(0)} / $symbol${budget.toStringAsFixed(0)}',
-                  color: monthSpend > budget * 0.9
-                      ? Colors.red.shade600
-                      : Colors.green.shade600,
-                ),
-              ],
-            ),
+          _ExpenseSummaryCard(
+            todayValue: AppUtils.formatAmountFull(expenses.todayTotal, symbol),
+            monthValue: AppUtils.formatAmountFull(monthSpend, symbol),
+            budgetValue: budget > 0 ? (monthSpend / budget).clamp(0, 1).toDouble() : 0,
+            budgetSubtitle: '$symbol${monthSpend.toStringAsFixed(0)} / $symbol${budget.toStringAsFixed(0)}',
+            budgetColor: monthSpend > budget * 0.9 ? Colors.red.shade600 : const Color(0xFFFF3B0A),
           ),
-
-          // Expense list
-          Expanded(
-            child: expenses.expenses.isEmpty
-                ? EmptyState(
-                    icon: Icons.receipt_long_rounded,
-                    title: 'No expenses yet',
-                    subtitle: 'Track your grocery spending here.',
-                    actionLabel: 'Add Expense',
-                    onAction: () => _showAddSheet(context),
-                  )
-                : ListView(
-                    padding:
-                        const EdgeInsets.fromLTRB(16, 8, 16, 100),
-                    children: [
-                      const SectionHeader(title: 'Recent Expenses'),
-                      ...expenses.expenses.map((e) => _ExpenseCard(
-                          expense: e, symbol: symbol)),
-                    ],
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
+              child: Column(
+                children: [
+                  SectionHeader(
+                    title: 'Recent Expenses',
+                    trailing: TextButton.icon(
+                      onPressed: () => _showAddSheet(context),
+                      icon: const Icon(Icons.add_rounded, size: 16),
+                      label: const Text('Add'),
+                    ),
                   ),
+                  if (expenses.expenses.isEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 10),
+                      child: EmptyState(
+                        icon: Icons.receipt_long_rounded,
+                        title: 'No expenses yet',
+                        subtitle: 'Track your grocery spending here.',
+                        actionLabel: 'Add Expense',
+                        onAction: () => _showAddSheet(context),
+                      ),
+                    )
+                  else
+                    ...expenses.expenses.map((e) => _ExpenseRow(expense: e, symbol: symbol)),
+                ],
+              ),
+            ),
           ),
         ],
       ),
@@ -105,6 +82,124 @@ class ExpensesScreen extends StatelessWidget {
       isScrollControlled: true,
       useSafeArea: true,
       builder: (_) => const AddExpenseSheet(),
+    );
+  }
+}
+
+class _ExpenseSummaryCard extends StatelessWidget {
+  final String todayValue;
+  final String monthValue;
+  final double budgetValue;
+  final String budgetSubtitle;
+  final Color budgetColor;
+
+  const _ExpenseSummaryCard({
+    required this.todayValue,
+    required this.monthValue,
+    required this.budgetValue,
+    required this.budgetSubtitle,
+    required this.budgetColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SectionHeader(title: 'Monthly Spend'),
+            const SizedBox(height: 2),
+            Row(
+              children: [
+                Expanded(
+                  child: _MiniMetric(
+                    label: 'Today',
+                    value: todayValue,
+                    icon: Icons.today_rounded,
+                    dark: true,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: _MiniMetric(
+                    label: 'This Month',
+                    value: monthValue,
+                    icon: Icons.calendar_month_rounded,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 14),
+            Row(
+              children: [
+                Expanded(child: Text('Budget', style: Theme.of(context).textTheme.titleSmall)),
+                Text(
+                  '${(budgetValue * 100).toInt()}%',
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(color: budgetColor, fontWeight: FontWeight.w700),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            LinearProgressIndicator(
+              value: budgetValue,
+              minHeight: 8,
+              borderRadius: BorderRadius.circular(4),
+              backgroundColor: budgetColor.withOpacity(0.14),
+              valueColor: AlwaysStoppedAnimation(budgetColor),
+            ),
+            const SizedBox(height: 8),
+            Text(budgetSubtitle, style: Theme.of(context).textTheme.bodySmall),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _MiniMetric extends StatelessWidget {
+  final String label;
+  final String value;
+  final IconData icon;
+  final bool dark;
+
+  const _MiniMetric({
+    required this.label,
+    required this.value,
+    required this.icon,
+    this.dark = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final foreground = dark ? Colors.white : const Color(0xFF17151A);
+    return Container(
+      height: 116,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: dark ? const Color(0xFF211D22) : const Color(0xFFF7F7F7),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: dark ? Colors.transparent : const Color(0xFFE8E8E8)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(child: Text(label, style: Theme.of(context).textTheme.bodySmall?.copyWith(color: foreground.withOpacity(0.72)))),
+              Icon(icon, color: foreground, size: 18),
+            ],
+          ),
+          const Spacer(),
+          Text(
+            value,
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(color: foreground),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
     );
   }
 }
@@ -158,6 +253,86 @@ class _ExpenseCard extends StatelessWidget {
           ],
         ),
         onLongPress: () => _deleteExpense(context),
+      ),
+    );
+  }
+
+  Future<void> _deleteExpense(BuildContext context) async {
+    final confirm = await showConfirmDialog(
+      context,
+      title: 'Delete Expense',
+      message: 'Delete "${expense.itemName}"?',
+    );
+    if (confirm) {
+      context.read<ExpenseProvider>().deleteExpense(expense.id);
+    }
+  }
+}
+
+class _ExpenseRow extends StatelessWidget {
+  final ExpenseModel expense;
+  final String symbol;
+
+  const _ExpenseRow({required this.expense, required this.symbol});
+
+  @override
+  Widget build(BuildContext context) {
+    final color = AppUtils.expenseCategoryColor(expense.category);
+    return InkWell(
+      onLongPress: () => _deleteExpense(context),
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 8),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF7F7F7),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: const Color(0xFFE8E8E8)),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 42,
+              height: 42,
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(Icons.receipt_rounded, color: color, size: 20),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(expense.itemName, style: Theme.of(context).textTheme.titleSmall),
+                  const SizedBox(height: 2),
+                  Text(
+                    '${expense.categoryLabel} · ${AppUtils.formatDate(expense.purchaseDate)}',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey.shade500),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  '$symbol${expense.totalAmount.toStringAsFixed(0)}',
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        color: const Color(0xFFFF3B0A),
+                        fontWeight: FontWeight.w700,
+                      ),
+                ),
+                Text(
+                  'qty ${expense.quantity % 1 == 0 ? expense.quantity.toInt() : expense.quantity}',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

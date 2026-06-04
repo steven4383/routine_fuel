@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:gap/gap.dart';
-
-// ─── Section Header ───────────────────────────────────────────────────────────
 
 class SectionHeader extends StatelessWidget {
   final String title;
@@ -11,25 +8,31 @@ class SectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          title,
-          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-            color: Theme.of(context).colorScheme.primary,
-            fontSize: 22,
-            fontWeight: FontWeight.w600,
+    return Padding(
+      padding: const EdgeInsets.only(top: 8, bottom: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Expanded(
+            child: Text(
+              title,
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                  ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
-        ),
-        if (trailing != null) trailing!,
-      ],
+          if (trailing != null) ...[
+            const SizedBox(width: 10),
+            trailing!,
+          ],
+        ],
+      ),
     );
   }
 }
-
-// ─── Stat Card ────────────────────────────────────────────────────────────────
 
 class StatCard extends StatelessWidget {
   final String label;
@@ -47,14 +50,35 @@ class StatCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(icon, color: color, size: 22),
-            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    label,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey.shade600),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                Icon(icon, color: color, size: 18),
+              ],
+            ),
+            const Spacer(),
             Text(
               value,
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(color: color, fontWeight: FontWeight.w700),
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
-            const SizedBox(height: 2),
-            Text(label, style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey.shade600)),
+            const SizedBox(height: 8),
+            Container(
+              width: 34,
+              height: 4,
+              decoration: BoxDecoration(
+                color: color,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
           ],
         ),
       ),
@@ -62,11 +86,9 @@ class StatCard extends StatelessWidget {
   }
 }
 
-// ─── Progress Indicator Card ─────────────────────────────────────────────────
-
 class ProgressCard extends StatelessWidget {
   final String label;
-  final double value; // 0.0 – 1.0
+  final double value;
   final String subtitle;
   final Color color;
 
@@ -87,7 +109,6 @@ class ProgressCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SectionHeader(title: 'Monthly Budget'),
-            Gap(10),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -106,7 +127,7 @@ class ProgressCard extends StatelessWidget {
               minHeight: 8,
               borderRadius: BorderRadius.circular(4),
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: 8),
             Text(subtitle, style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey.shade600)),
           ],
         ),
@@ -114,8 +135,6 @@ class ProgressCard extends StatelessWidget {
     );
   }
 }
-
-// ─── Empty State ─────────────────────────────────────────────────────────────
 
 class EmptyState extends StatelessWidget {
   final IconData icon;
@@ -137,28 +156,41 @@ class EmptyState extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(40),
+        padding: const EdgeInsets.all(24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 64, color: Theme.of(context).colorScheme.primary.withOpacity(0.3)),
+            Container(
+              width: 70,
+              height: 70,
+              decoration: BoxDecoration(
+                color: const Color(0xFFFF3B0A).withOpacity(0.08),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: const Color(0xFFFF3B0A).withOpacity(0.18)),
+              ),
+              child: Icon(icon, size: 34, color: const Color(0xFFFF3B0A)),
+            ),
             const SizedBox(height: 16),
             Text(
               title,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.grey.shade600),
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.grey.shade700),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
             Text(
               subtitle,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey.shade400),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey.shade500),
               textAlign: TextAlign.center,
             ),
             if (actionLabel != null && onAction != null) ...[
               const SizedBox(height: 24),
-              Container(
+              SizedBox(
                 height: 50,
-                child: ElevatedButton(onPressed: onAction, child: Text(actionLabel!)),
+                child: ElevatedButton.icon(
+                  onPressed: onAction,
+                  icon: const Icon(Icons.add_rounded, size: 18),
+                  label: Text(actionLabel!),
+                ),
               ),
             ],
           ],
@@ -167,8 +199,6 @@ class EmptyState extends StatelessWidget {
     );
   }
 }
-
-// ─── Stock Bar ────────────────────────────────────────────────────────────────
 
 class StockBar extends StatelessWidget {
   final double quantity;
@@ -201,16 +231,14 @@ class StockBar extends StatelessWidget {
         Text(
           '${quantity % 1 == 0 ? quantity.toInt() : quantity.toStringAsFixed(1)} $unitLabel',
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: isLow ? Colors.red.shade600 : Colors.grey.shade600,
-            fontWeight: isLow ? FontWeight.w600 : FontWeight.normal,
-          ),
+                color: isLow ? Colors.red.shade600 : Colors.grey.shade600,
+                fontWeight: isLow ? FontWeight.w600 : FontWeight.normal,
+              ),
         ),
       ],
     );
   }
 }
-
-// ─── Alert Banner ────────────────────────────────────────────────────────────
 
 class AlertBanner extends StatelessWidget {
   final String message;
@@ -248,8 +276,6 @@ class AlertBanner extends StatelessWidget {
     );
   }
 }
-
-// ─── Confirm Dialog ───────────────────────────────────────────────────────────
 
 Future<bool> showConfirmDialog(
   BuildContext context, {
